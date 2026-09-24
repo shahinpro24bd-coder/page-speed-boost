@@ -41,7 +41,7 @@ export type ContentSnapshot = {
 
 // Public content changes rarely. A longer warm cache removes repeated database
 // round-trips while admin previews still bypass it and publish invalidates it.
-const TTL_MS = 5 * 60 * 1000;
+const TTL_MS = 15 * 1000;
 
 function withBundledFallback(data: ContentSnapshot): ContentSnapshot {
   const bundled = fallbackSnapshot as ContentSnapshot;
@@ -68,7 +68,7 @@ function withBundledFallback(data: ContentSnapshot): ContentSnapshot {
 // Start with the bundled snapshot so the first visitor never waits for a
 // network round-trip before the HTML can be returned.
 let cached: { at: number; data: ContentSnapshot } | null = {
-  at: Date.now(),
+  at: 0,
   data: fallbackSnapshot as ContentSnapshot,
 };
 let inflight: Promise<ContentSnapshot> | null = null;
@@ -130,8 +130,16 @@ async function fetchSnapshot(): Promise<ContentSnapshot> {
 
 /** Short-lived in-process cache so repeat visitors never wait on the database. */
 export async function getContentSnapshot(force = false): Promise<ContentSnapshot> {
-  if (!force && cached && Date.now() - cached.at < TTL_MS) return cached.data;
+  if (!force && cached) {
+    // Serve instantly; refresh in the background once the copy is stale.
+    if (Date.now() - cached.at >= TTL_MS && !inflight) void refresh();
+    return cached.data;
+  }
   if (!force && inflight) return inflight;
+  return refresh();
+}
+
+function refresh(): Promise<ContentSnapshot> {
   inflight = fetchSnapshot()
     .then((data) => {
       const completeData = withBundledFallback(data);
@@ -151,5 +159,5 @@ export async function getContentSnapshot(force = false): Promise<ContentSnapshot
 }
 
 export function invalidateContentCache() {
-  cached = { at: Date.now(), data: fallbackSnapshot as ContentSnapshot };
+  cached = null;
 }
