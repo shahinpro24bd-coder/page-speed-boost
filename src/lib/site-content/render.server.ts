@@ -29,6 +29,14 @@ export async function renderSitePage(request: Request, slug: string): Promise<Re
   const snapshot = await getContentSnapshot(editMode);
   const texts = snapshot.langs[lang];
 
+  // Fully rendered pages are memoised per slug+language+content version, so a
+  // repeat request skips the HTML parse/transform entirely.
+  const cacheKey = `${slug}|${lang}|${snapshot.version}`;
+  if (!editMode) {
+    const cached = RENDER_CACHE.get(cacheKey);
+    if (cached) return htmlResponse(cached, snapshot.version, false);
+  }
+
   const bootstrap =
     `<script>window.__SITE_LANG__=${JSON.stringify(lang)};` +
     `window.__SITE_LANGS__=${JSON.stringify([...SITE_LANGS])};` +
