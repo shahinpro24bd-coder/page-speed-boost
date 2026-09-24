@@ -67,4 +67,38 @@
 
   if ("requestIdleCallback" in window) requestIdleCallback(warmVisibleLinks, { timeout: 2000 });
   else setTimeout(warmVisibleLinks, 1200);
+
+  // After this page is fully loaded, quietly download every menu page and its
+  // photos so the very first click on any menu item is already cached.
+  function warmAllPages() {
+    var seen = Object.create(null);
+    var navs = document.querySelectorAll("a.nav-link[href]");
+    for (var i = 0; i < navs.length; i++) {
+      var url = internal(navs[i].getAttribute("href"));
+      if (!url || seen[url.split("#")[0]]) continue;
+      url = url.split("#")[0];
+      seen[url] = true;
+      prefetched[url] = true;
+      fetch(url, { credentials: "same-origin" })
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          var doc = new DOMParser().parseFromString(html, "text/html");
+          var imgs = doc.querySelectorAll("img[src]");
+          for (var j = 0; j < imgs.length && j < 40; j++) {
+            var im = new Image();
+            im.decoding = "async";
+            im.src = new URL(imgs[j].getAttribute("src"), location.href).href;
+          }
+        })
+        .catch(function () {});
+    }
+  }
+  function scheduleWarm() {
+    setTimeout(function () {
+      if ("requestIdleCallback" in window) requestIdleCallback(warmAllPages, { timeout: 3000 });
+      else warmAllPages();
+    }, 800);
+  }
+  if (document.readyState === "complete") scheduleWarm();
+  else window.addEventListener("load", scheduleWarm);
 })();
