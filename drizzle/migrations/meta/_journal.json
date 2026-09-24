@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790178635178,
+      "tag": "0000_create_site_cms",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790178665283,
+      "tag": "0001_site_media_storage_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790255035394,
+      "tag": "0002_add_site_text_languages",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790257662972,
+      "tag": "0003_create_site_cms_idempotent",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790259060436,
+      "tag": "0004_create_site_cms",
+      "breakpoints": true
+    }
+  ]
+}
