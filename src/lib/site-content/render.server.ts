@@ -60,13 +60,25 @@ export async function renderSitePage(request: Request, slug: string): Promise<Re
   const headIndex = html.lastIndexOf("</head>");
   if (headIndex !== -1) html = html.slice(0, headIndex) + links.join("") + html.slice(headIndex);
 
+  if (!editMode) {
+    if (RENDER_CACHE.size > 64) RENDER_CACHE.clear();
+    RENDER_CACHE.set(cacheKey, html);
+  }
+
+  return htmlResponse(html, snapshot.version, editMode);
+}
+
+/** slug|lang|version|path -> fully rendered HTML */
+const RENDER_CACHE = new Map<string, string>();
+
+function htmlResponse(html: string, version: number | string, editMode: boolean): Response {
   return new Response(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": editMode
         ? "no-store"
         : "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
-      "X-Content-Version": String(snapshot.version),
+      "X-Content-Version": String(version),
     },
   });
 }
