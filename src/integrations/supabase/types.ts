@@ -14,153 +14,16 @@ export type Database = {
   }
   public: {
     Tables: {
-      site_content_version: {
-        Row: {
-          id: number
-          updated_at: string
-          version: number
-        }
-        Insert: {
-          id?: number
-          updated_at?: string
-          version?: number
-        }
-        Update: {
-          id?: number
-          updated_at?: string
-          version?: number
-        }
-        Relationships: []
-      }
-      site_images: {
-        Row: {
-          id: string
-          label: string | null
-          page: string
-          slot: string
-          storage_path: string | null
-          updated_at: string
-          url: string
-        }
-        Insert: {
-          id?: string
-          label?: string | null
-          page?: string
-          slot: string
-          storage_path?: string | null
-          updated_at?: string
-          url: string
-        }
-        Update: {
-          id?: string
-          label?: string | null
-          page?: string
-          slot?: string
-          storage_path?: string | null
-          updated_at?: string
-          url?: string
-        }
-        Relationships: []
-      }
-      site_pages: {
-        Row: {
-          description_key: string
-          id: string
-          keywords_key: string | null
-          path: string
-          slug: string
-          sort_order: number
-          title_key: string
-          updated_at: string
-        }
-        Insert: {
-          description_key: string
-          id?: string
-          keywords_key?: string | null
-          path: string
-          slug: string
-          sort_order?: number
-          title_key: string
-          updated_at?: string
-        }
-        Update: {
-          description_key?: string
-          id?: string
-          keywords_key?: string | null
-          path?: string
-          slug?: string
-          sort_order?: number
-          title_key?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      site_texts: {
-        Row: {
-          id: string
-          key: string
-          kind: string
-          lang: string
-          page: string
-          updated_at: string
-          value: string
-        }
-        Insert: {
-          id?: string
-          key: string
-          kind?: string
-          lang: string
-          page?: string
-          updated_at?: string
-          value?: string
-        }
-        Update: {
-          id?: string
-          key?: string
-          kind?: string
-          lang?: string
-          page?: string
-          updated_at?: string
-          value?: string
-        }
-        Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      app_role: "admin"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -287,8 +150,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin"],
-    },
+    Enums: {},
   },
 } as const
