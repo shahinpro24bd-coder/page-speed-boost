@@ -107,8 +107,10 @@ export const saveImageSlot = createServerFn({ method: "POST" })
     const url = `/api/public/media/${data.storagePath}`;
     const { error } = await context.supabase
       .from("site_images")
-      .update({ url, storage_path: data.storagePath })
-      .eq("slot", data.slot);
+      .upsert(
+        { slot: data.slot, url, storage_path: data.storagePath, updated_at: new Date().toISOString() },
+        { onConflict: "slot" },
+      );
     if (error) throw new Error(error.message);
 
     invalidateContentCache();

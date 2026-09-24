@@ -177,5 +177,46 @@
     true,
   );
 
+  function collectImages() {
+    var seen = {};
+    var list = [];
+    document.querySelectorAll("[data-ik]").forEach(function (img) {
+      var slot = img.getAttribute("data-ik");
+      if (!slot || seen[slot]) return;
+      seen[slot] = 1;
+      list.push({ slot: slot, url: img.currentSrc || img.getAttribute("src") || "" });
+    });
+    document.querySelectorAll("[data-ik-bg]").forEach(function (el) {
+      var slots = (el.getAttribute("data-ik-bg") || "").split("|");
+      var urls = [];
+      (el.getAttribute("style") || "").replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi, function (f, q, u) {
+        urls.push(u);
+        return f;
+      });
+      slots.forEach(function (slot, i) {
+        if (!slot || seen[slot]) return;
+        seen[slot] = 1;
+        list.push({ slot: slot, url: urls[i] || "" });
+      });
+    });
+    return list;
+  }
+
+  window.addEventListener("message", function (event) {
+    var data = event.data;
+    if (!data || data.source !== "cms-admin") return;
+    if (data.type === "image-saved") send({ type: "images", images: collectImages() });
+    if (data.type === "scroll-to") {
+      var el = document.querySelector('[data-ik="' + data.slot + '"]');
+      if (!el) {
+        document.querySelectorAll("[data-ik-bg]").forEach(function (b) {
+          if (!el && (b.getAttribute("data-ik-bg") || "").split("|").indexOf(data.slot) >= 0) el = b;
+        });
+      }
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  });
+
   send({ type: "ready" });
+  send({ type: "images", images: collectImages() });
 })();
