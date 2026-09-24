@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ExternalLink, LogOut, Save } from "lucide-react";
+import { ExternalLink, ImagePlus, LogOut, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { saveImageSlot, saveTexts } from "@/lib/site-content/admin.functions";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,8 @@ const PAGES = [
   { slug: "index", label: "Anasayfa" },
   { slug: "about", label: "Hakkımda" },
   { slug: "service", label: "Tedaviler" },
-  { slug: "appoinment", label: "Tedavi Bilgileri" },
+  { slug: "treatment", label: "Tedavi Bilgileri" },
+  { slug: "appoinment", label: "Randevu" },
   { slug: "contact", label: "İletişim" },
 ] as const;
 
@@ -37,6 +38,14 @@ function AdminPage() {
   const [lang, setLang] = useState<string>("tr");
   const [dirty, setDirty] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<Status>({ tone: "idle", message: "" });
+
+  const [images, setImages] = useState<{ slot: string; url: string }[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const pendingSlot = useRef<string | null>(null);
+  const pickImage = (slot: string) => {
+    pendingSlot.current = slot;
+    fileRef.current?.click();
+  };
 
   const dirtyCount = useMemo(() => Object.keys(dirty).length, [dirty]);
   const frameSrc = `/${page}.html?edit=1&lang=${lang}`;
@@ -73,6 +82,10 @@ function AdminPage() {
       if (!data || data.source !== "cms-editor") return;
       if (data.type === "lang-changed" && typeof data.lang === "string") {
         setLang(data.lang);
+        return;
+      }
+      if (data.type === "images" && Array.isArray(data.images)) {
+        setImages(data.images);
         return;
       }
       if (data.type === "text") {
@@ -201,12 +214,63 @@ function AdminPage() {
         </div>
       </header>
 
-      <iframe
-        ref={frameRef}
-        key={frameSrc}
-        src={frameSrc}
-        title="Site önizleme"
-        className="min-h-0 w-full flex-1 border-0 bg-background"
+      <div className="flex min-h-0 flex-1">
+        <iframe
+          ref={frameRef}
+          key={frameSrc}
+          src={frameSrc}
+          title="Site önizleme"
+          className="min-h-0 min-w-0 flex-1 border-0 bg-background"
+        />
+        <aside className="hidden w-64 shrink-0 overflow-y-auto border-l border-border bg-card p-3 md:block">
+          <h2 className="mb-2 text-sm font-semibold text-card-foreground">
+            Görseller ({images.length})
+          </h2>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Değiştirmek istediğiniz görselde "Değiştir"e basın.
+          </p>
+          <ul className="space-y-3">
+            {images.map((img) => (
+              <li key={img.slot} className="rounded-md border border-border p-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    frameRef.current?.contentWindow?.postMessage(
+                      { source: "cms-admin", type: "scroll-to", slot: img.slot },
+                      "*",
+                    )
+                  }
+                  className="block w-full"
+                  title="Sayfada göster"
+                >
+                  <img src={img.url} alt={img.slot} className="h-24 w-full rounded object-cover" />
+                </button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  className="mt-2 w-full"
+                  disabled={status.tone === "busy"}
+                  onClick={() => pickImage(img.slot)}
+                >
+                  <ImagePlus aria-hidden="true" />
+                  Değiştir
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (file && pendingSlot.current) void uploadImage(pendingSlot.current, file);
+        }}
       />
     </div>
   );
