@@ -6,6 +6,7 @@ export const Route = createFileRoute("/$page")({
     const labels: Record<string, string> = {
       "about.html": "Hakkımda",
       "service.html": "Tedaviler",
+      "treatment.html": "Tedavi Bilgileri",
       "appoinment.html": "Randevu",
       "contact.html": "İletişim",
     };

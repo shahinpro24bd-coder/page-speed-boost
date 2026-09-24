@@ -44,6 +44,7 @@ export const PAGES = [
   { slug: "index", file: "index.html", label: "Anasayfa" },
   { slug: "about", file: "about.html", label: "Hakkımda" },
   { slug: "service", file: "service.html", label: "Tedaviler" },
+  { slug: "treatment", file: "treatment.html", label: "Tedavi Bilgileri" },
   { slug: "appoinment", file: "appoinment.html", label: "Randevu" },
   { slug: "contact", file: "contact.html", label: "İletişim" },
 ] as const;
