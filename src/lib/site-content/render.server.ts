@@ -77,7 +77,7 @@ function htmlResponse(html: string, version: number | string, editMode: boolean)
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": editMode
         ? "no-store"
-        : "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+        : "public, max-age=20, s-maxage=20, stale-while-revalidate=86400",
       "X-Content-Version": String(version),
     },
   });
