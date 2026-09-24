@@ -31,7 +31,7 @@ export async function renderSitePage(request: Request, slug: string): Promise<Re
 
   // Fully rendered pages are memoised per slug+language+content version, so a
   // repeat request skips the HTML parse/transform entirely.
-  const cacheKey = `${slug}|${lang}|${snapshot.version}`;
+  const cacheKey = `${slug}|${lang}|${snapshot.version}|${url.pathname}`;
   if (!editMode) {
     const cached = RENDER_CACHE.get(cacheKey);
     if (cached) return htmlResponse(cached, snapshot.version, false);
